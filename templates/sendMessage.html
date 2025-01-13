@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐Send to {{ target }}⭐</title>
+
+    <link rel="stylesheet" href="./../static/output.css">
+    <link rel="stylesheet" href="./../static/heroBackground.css">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+</head>
+<body id="background" class="transition-colors bg-[#3E1E68]">
+    <div class="background">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-lg w-full p-5">
+        <div id="container" class="bg-white animate-jump-in rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-5 text-gray-800">
+                <p class="username mb-2 text-center">Send to: <span class="font-extrabold">@{{ target }}</span></p>
+                <h1 class="font-extrabold text-xl mb-2 text-center">Ask me anything, anonymously!</h1>
+
+                <span id="sendMessageResponse"></span>
+
+            </div>
+            <form id="sendMessage">
+                <input type="hidden" name="target" value="{{ target }}">
+                <div class="min-h-28 bg-slate-300 p-3">
+                    <textarea name="message" spellcheck="false" id="message" rows="5" placeholder="What's on your mind?" class="text-center w-full text-2xl font-extrabold text-gray-800 p-1 md:p-4 bg-transparent outline-none resize-none"></textarea>
+                </div>
+                <div class="p-5">
+                    <button id="sendButton" class=" w-full py-3 rounded-2xl bg-purple-800 text-white duration-300">Send!</button>
+                    <p tabindex="0" spellcheck="false" class="duration-300 text-center font-extrabold text-xl pt-3" id="showCount"></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        var showCount = document.getElementById('showCount');
+        var messageInput = document.getElementById('message');
+        var container = document.getElementById('container');
+        var sendButton = document.getElementById('sendButton');
+        var background = document.getElementById('background');
+        var sendMessage = document.getElementById('sendMessage');
+        var sendMessageResponse = document.getElementById('sendMessageResponse');
+        var count = 0;
+        var maxChar = 70;
+
+        setTimeout(() => {
+            container.classList.remove('animate-jump-in');
+            container.classList.add('animate-duration-300');
+        }, 500);
+
+        showCount.textContent = `${count}/${maxChar}`;
+
+        // Add animation on keydown in the textarea
+        messageInput.addEventListener('input', function () {
+            let count = messageInput.value.length; 
+
+            if (count > maxChar) {
+                messageInput.value = messageInput.value.slice(0, maxChar);
+                showCount.textContent = `${maxChar}/${maxChar}`;
+                showCount.classList.add('animate-shake', 'text-red-900');
+                sendButton.classList.replace('bg-purple-800','bg-red-500');
+                background.classList.replace('bg-[#3E1E68]','bg-red-500');
+                container.classList.add('animate-shake'); 
+                setTimeout(() => {
+                    showCount.classList.remove('animate-shake', 'text-red-900'); 
+                    sendButton.classList.replace('bg-red-500', 'bg-purple-800');
+                    background.classList.replace('bg-red-500', 'bg-[#3E1E68]');
+                    container.classList.remove('animate-shake'); 
+                }, 300);
+            } else {
+                showCount.textContent = `${count}/${maxChar}`;
+                showCount.classList.add('animate-jump', 'text-emerald-600');
+                setTimeout(() => {
+                    showCount.classList.remove('animate-jump', 'text-emerald-600');
+                }, 300);
+            }
+        });
+
+        sendMessage.addEventListener('submit', function(e) {
+            e.preventDefault()
+            $.ajax({
+                url: '/submitMessage',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.status === 'success') {
+                        sendMessageResponse.innerHTML = `<p id="sendMessage_success" class="animate-fade-up p-3 rounded-lg bg-emerald-200 text-emerald-800 font-extrabold">${response.message}</p>`;
+                    } else {
+                        sendMessageResponse.innerHTML = `<p id="sendMessage_bad_request" class="animate-shake p-3 rounded-lg bg-red-200 border border-red-700 text-red-800">${response.message}</p>`;
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert(xhr.responseJSON.message)
+                    sendMessageResponse.innerHTML = `<p id="sendMessage_bad_request" class="animate-shake p-3 rounded-lg bg-red-200 border border-red-700 text-red-800 mb-5">${xhr.responseJSON.message ? xhr.responseJSON.message : 'Unknown Error'}</p>`;
+                }
+            });
+        })
+    </script>
+</body>
+</html>

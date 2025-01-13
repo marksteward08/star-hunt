@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.section-container {
+    @apply max-w-7xl mx-auto px-5;
+}
+
+.input-text {
+    @apply w-full py-3 px-4 bg-slate-300 text-slate-700 rounded-xl placeholder:text-slate-500;
+}
+
+.dialog-box {
+    @apply relative max-w-lg mx-auto bg-slate-50 px-5 rounded-xl z-50;
+}
