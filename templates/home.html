@@ -14,7 +14,7 @@
     <div id="splash" class="hidden fixed inset-0 bg-white transition-opacity opacity-0 z-50"></div>
     <div id="modal" class=" hidden fixed inset-0 bg-black bg-opacity-65 transition-opacity opacity-100 z-40 justify-center items-center px-5">
         <div class="max-w-lg w-full min-h-10 flex flex-col items-center relative">
-            <div id="close" class="absolute right-5 top-5 size-5 bg-red-500 rounded-full cursor-pointer"></div>
+            <div id="close" class="hidden absolute right-5 top-5 size-8 bg-red-500 rounded-full cursor-pointer"></div>
             <img src="./static/images/star.png" class="opacity-50 animate-spin animate-duration-[15000ms]" tabindex="-1">
             <div class=" w-full min-h-40 max-h-60 bg-white absolute left-0 bottom-0 rounded-xl overflow-y-auto">
                 <div class="p-5">
@@ -50,7 +50,7 @@
     <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 px-5">
         <div id="clipboardCopy" class="group bg-white focus:bg-emerald-500 rounded-2xl text-center px-12 py-5 transition-colors shadow-xl cursor-pointer" tabindex="0">
             <p class="font-semibold text-gray-900 group-focus:text-slate-200">Tap to copy link</p>
-            <h1 class="text-lg font-extrabold text-gray-700 group-focus:text-slate-200">https://www.facebook.com</h1>
+            <h1 class="text-lg font-extrabold text-gray-700 group-focus:text-slate-200"></h1>
         </div>
     </div>
 </body>
@@ -67,13 +67,13 @@
         var splash = document.getElementById('splash');
         var modal = document.getElementById('modal');
         var clipboardCopy = document.getElementById('clipboardCopy');
+        var close = document.getElementById('close');
 
         const ANIMATION_DELAY = 50;
         const JUMP_IN_DURATION = 500;
         const SPLASH_DURATION = 1500;
-        const MODAL_DELAY = 1200;
 
-        const copyLink = window.location.hostname + '/send/{{ session }}';
+        const copyLink = `${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/send/{{ session }}`;
 
         setTimeout(() => {
             hint.classList.replace('hidden', 'animate-jump-in')
@@ -115,13 +115,14 @@
                 setTimeout(() => {
                   modal.classList.replace('hidden', 'flex');
                   splash.classList.add('duration-[2500ms]');
+                  star.classList.add('hidden');
                   splash.classList.replace('opacity-100', 'opacity-0');
 
                   setTimeout(() => {
                     splash.classList.replace('z-50', 'z-30');
-                    star.classList.add('hidden');
-                  }, SPLASH_DURATION);
-                }, MODAL_DELAY);
+                    close.classList.replace('hidden', 'animate-jump-in');
+                  },  SPLASH_DURATION + 1000);
+                }, SPLASH_DURATION);
               }, 30);
             }
           });
@@ -131,7 +132,8 @@
           animateStar(star, index);
         });
 
-        document.getElementById('close').addEventListener('click', function(e) {
+        close.addEventListener('click', function(e) {
+            close.classList.replace('animate-jump-in', 'hidden');
             splash.classList.replace('flex', 'hidden');
             splash.classList.remove('duration-[2500ms]');
             modal.classList.replace('flex', 'hidden');
