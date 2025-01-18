@@ -36,7 +36,7 @@ def signup():
     confirm_password = request.form.get('confirm_password')
     user_exists = any(user["username"] == username for user in users)
 
-    if len(username) <= 5 and len(password)  < 5:
+    if len(username) < 5 or len(password)  < 5:
         return jsonify({'status': 'error', 'message': 'Username and Password must have <b>5</b> or more characters'}), 400
     
     if password != confirm_password:
