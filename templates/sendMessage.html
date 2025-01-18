@@ -99,11 +99,6 @@
         var count = 0;
         var maxChar = 70;
 
-        setTimeout(() => {
-            container.classList.remove('animate-jump-in');
-            container.classList.add('animate-duration-300');
-        }, 500);
-
         showCount.textContent = `${count}/${maxChar}`;
 
         // Add animation on keydown in the textarea
@@ -141,6 +136,10 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         sendMessageResponse.innerHTML = `<p id="sendMessage_success" class="animate-fade-up p-3 rounded-lg bg-emerald-200 text-emerald-800 font-extrabold">${response.message}</p>`;
+                        messageInput.value = '';
+                        messageInput.disabled = true;
+                        sendButton.disabled = true;
+                        messageInput.readOnlt = true;
                     } else {
                         sendMessageResponse.innerHTML = `<p id="sendMessage_bad_request" class="animate-shake p-3 rounded-lg bg-red-200 border border-red-700 text-red-800">${response.message}</p>`;
                     }

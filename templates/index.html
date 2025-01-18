@@ -175,6 +175,15 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         signupResponse.innerHTML = `<p id="signup_success" class="animate-fade-up p-3 rounded-lg bg-emerald-200 text-emerald-800 font-extrabold mb-5">${response.message}</p>`;
+                        setTimeout(()=>{
+                            signupForm.classList.replace('opacity-100', 'opacity-0');
+                            setTimeout(() => {
+                                signupForm.classList.add('hidden');
+                                loginForm.classList.remove('hidden');
+                                setTimeout(() => loginForm.classList.replace('opacity-0', 'opacity-100'), 30);
+                            }, 300);
+                        }, 3000)
+                moreAction.textContent = "Create an Account";
                     } else {
                         signupResponse.innerHTML =  `<p id="signup_bad_request" class="animate-shake p-3 rounded-lg bg-red-200 text-red-800 mb-5">${response.message}</p>`;
                     }

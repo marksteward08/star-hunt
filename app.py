@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
-from sqlalchemy import true
-from sqlalchemy.exc import SQLAlchemyError
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -10,25 +8,6 @@ app.secret_key = 'your_secret_key'
 # Localization
 messages = []
 users = []
-
-
-# SQLAlchemy configuration for MySQL (XAMPP)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost/starbox'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# DATABASE DEFINITION
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(255), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-
-class Message(db.Model):
-    __tablename__ = 'send_message'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    target = db.Column(db.String(255), nullable=False)
-    message = db.Column(db.String(255), nullable=False)
 
 @app.route('/')
 def index():
@@ -52,18 +31,19 @@ def login():
 
 @app.route('/signup', methods=['POST'])
 def signup():
-    username = request.form.get('username')
-    password = request.form.get('password')
+    username = request.form.get('username').strip()
+    password = request.form.get('password').strip()
     confirm_password = request.form.get('confirm_password')
     user_exists = any(user["username"] == username for user in users)
 
-    # if User.query.filter_by(username=username).first():
-    #     return jsonify({'status': 'error', 'message': 'Username already exists'}), 409
+    if len(username) <= 5 and len(password)  <= 5:
+        return jsonify({'status': 'error', 'message': 'Username and Password must have <b>5</b> or more characters'}), 400
+    
     if password != confirm_password:
         return jsonify({'status': 'error', 'message': 'Passwords do not match'}), 400
     
     if user_exists:
-        return jsonify({'status': 'error', 'message': 'Username already exists'}), 409
+        return jsonify({'status': 'error', 'message': 'Username already exists'}), 400
 
     salt = bcrypt.gensalt(rounds=5)
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
@@ -75,7 +55,7 @@ def signup():
 
     print(users)
 
-    return jsonify({'status': 'success', 'message': 'User registered successfully!'})
+    return jsonify({'status': 'success', 'message': 'User registered successfully! Please wait.'})
 
 @app.route('/submitMessage', methods=['POST'])
 def submitMessage():
@@ -111,4 +91,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=true)
+    app.run(debug=True)
