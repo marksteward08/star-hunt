@@ -7,6 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+# Localization
+messages = []
+users = []
+
 
 # SQLAlchemy configuration for MySQL (XAMPP)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost/starbox'
@@ -38,36 +42,38 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    try:
-        user = User.query.filter_by(username=username).first()
-        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-            session['username'] = username
-            return jsonify({
-                'status': 'success',
-                'message': 'Login successful! Please wait.',
-                'redirect_url': url_for('home')
-            })
+    user = next((user for user in users if user["username"] == username), None)
+
+    if user and bcrypt.checkpw(password.encode('utf-8'), user["password"].encode('utf-8')):
+        session['username'] = username
+        return jsonify({'status': 'success', 'message': 'Login successful! Please wait.', 'redirect_url': url_for('home')})
+    else:
         return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
-    except SQLAlchemyError:
-        return jsonify({'status': 'error', 'message': 'Internal server error.'}), 500
 
 @app.route('/signup', methods=['POST'])
 def signup():
     username = request.form.get('username')
     password = request.form.get('password')
     confirm_password = request.form.get('confirm_password')
+    user_exists = any(user["username"] == username for user in users)
 
-    if User.query.filter_by(username=username).first():
-        return jsonify({'status': 'error', 'message': 'Username already exists'}), 409
+    # if User.query.filter_by(username=username).first():
+    #     return jsonify({'status': 'error', 'message': 'Username already exists'}), 409
     if password != confirm_password:
         return jsonify({'status': 'error', 'message': 'Passwords do not match'}), 400
+    
+    if user_exists:
+        return jsonify({'status': 'error', 'message': 'Username already exists'}), 409
 
     salt = bcrypt.gensalt(rounds=5)
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-    new_user = User(username=username, password=hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
+    users.append({
+        'username' : username,
+        'password' : hashed_password
+    })
+
+    print(users)
 
     return jsonify({'status': 'success', 'message': 'User registered successfully!'})
 
@@ -77,9 +83,11 @@ def submitMessage():
     message = request.form.get('message')
 
     if message and 0 < len(message) <= 70:
-        new_message = Message(target=target, message=message)
-        db.session.add(new_message)
-        db.session.commit()
+        messages.append({
+            'target': target,
+            'message': message
+        })
+        print(messages)
         return jsonify({'status': 'success', 'message': 'Message sent to user!'})
     else:
         return jsonify({'status': 'error', 'message': 'Invalid message length!'})
@@ -87,8 +95,7 @@ def submitMessage():
 @app.route('/home')
 def home():
     if 'username' in session:
-        messages = db.session.query(Message).filter(Message.target == session['username']).all()
-        messages_data = [{'id': msg.id, 'target': msg.target, 'message': msg.message} for msg in messages]
+        messages_data = [message for message in messages if message['target'] == session['username']]
     else:
         return redirect(url_for('index'))
 

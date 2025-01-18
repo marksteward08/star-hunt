@@ -16,7 +16,7 @@
         <div class="max-w-lg w-full min-h-10 flex flex-col items-center relative">
             <div id="close" class="hidden absolute right-5 top-5 size-8 bg-red-500 rounded-full cursor-pointer"></div>
             <img src="./static/images/star.png" class="opacity-50 animate-spin animate-duration-[15000ms]" tabindex="-1">
-            <div class=" w-full min-h-40 max-h-60 bg-white absolute left-0 bottom-0 rounded-xl overflow-y-auto">
+            <div class="w-full min-h-40 max-h-60 flex items-center justify-center bg-white absolute left-0 bottom-0 rounded-xl overflow-y-auto">
                 <div class="p-5">
                     <h1 id="textHolder" class="text-center text-2xl font-extrabold text-gray-800">
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe esse quibusdam amet expedita eos repellendus atque. Distinctio iste dolorem ratione?
@@ -38,11 +38,12 @@
                 <!-- Loop through the messages passed from Flask -->
                 {% for message in messages %}
                     <span>
-                        <div data-id="{{ message.id }}" class="hidden small-div group size-16 flex justify-center items-center focus:scale-150 duration-150"  tabindex="0">
+                        <div data-id="{{ loop.index0 }}" class="hidden small-div group size-16 flex justify-center items-center focus:scale-150 duration-150" tabindex="0">
                             <img src="./static/images/star.png" class="size-full object-cover cursor-pointer" alt="">
                         </div>
                     </span>
                 {% endfor %}
+
             </div>
         </div>
     </section>
@@ -58,8 +59,8 @@
 <script>
 
     document.addEventListener("DOMContentLoaded", () => {
-        var messages = {{ messages | tojson }};
 
+        var messages = {{ messages | tojson | safe }};
         console.log(messages);
 
         var hint = document.getElementById('hint');
@@ -104,7 +105,7 @@
         function addDoubleClickListener(star) {
           star.addEventListener('dblclick', () => {
             const id = star.getAttribute('data-id');
-            const result = messages.find(item => item.id === parseInt(id, 10));
+            const result = messages[id];
 
             if (result) {
               document.getElementById('textHolder').textContent = result.message;
