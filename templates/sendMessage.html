@@ -99,6 +99,10 @@
         var count = 0;
         var maxChar = 70;
 
+        setTimeout(() => {
+            container.classList.remove('animate-jump-in');
+        }, 500)
+
         showCount.textContent = `${count}/${maxChar}`;
 
         // Add animation on keydown in the textarea
