@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
+import requests
+import time
+from datetime import datetime
+import threading
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -89,6 +93,21 @@ def send(target):
 def logout():
     session.pop('username', None)
     return redirect(url_for('index'))
+
+# PING Function
+url = "https://star-hunt.onrender.com/" 
+interval = 30 
+
+def reload_website():
+    while True:
+        try:
+            response = requests.get(url)
+            print(f"Reloaded at {datetime.utcnow().isoformat()}: Status Code {response.status_code}")
+        except requests.RequestException as error:
+            print(f"Error reloading at {datetime.utcnow().isoformat()}: {error}")
+        time.sleep(interval)
+
+threading.Thread(target=reload_website, daemon=True).start()
 
 if __name__ == '__main__':
     app.run(debug=True)
