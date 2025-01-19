@@ -96,7 +96,7 @@ def logout():
 
 # PING Function
 url = "https://star-hunt.onrender.com/" 
-interval = 30 
+interval = 600
 
 def reload_website():
     while True:
